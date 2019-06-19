@@ -4,10 +4,10 @@ extern crate quickcheck;
 extern crate murmur3;
 extern crate murmur3_sys;
 
-use std::io::Cursor;
 use std::hash::Hasher;
+use std::io::Cursor;
 
-use byteorder::{LittleEndian, ByteOrder};
+use byteorder::{ByteOrder, LittleEndian};
 
 use murmur3::murmur3_32::MurmurHasher as MurmurHasher32;
 use murmur3_sys::MurmurHash3_x86_32;
@@ -16,12 +16,10 @@ use murmur3::murmur3_x86_128;
 use murmur3_sys::MurmurHash3_x86_128;
 
 use murmur3::murmur3_x64_128::murmur3_x64_128;
-//use murmur3::murmur3_x64_128::MurmurHasher as MurmurHasher_64_128;
+use murmur3::murmur3_x64_128::MurmurHasher as MurmurHasher_64_128;
 use murmur3_sys::MurmurHash3_x64_128;
 
-
-
-quickcheck!{
+quickcheck! {
     fn quickcheck_32(input:(u32, Vec<u8>)) -> bool{
         let seed = input.0;
         let xs = input.1;
@@ -36,7 +34,6 @@ quickcheck!{
         output == output2
     }
 }
-
 
 quickcheck! {
     fn quickcheck_x86_128(input:(u32, Vec<u8>)) -> bool {
@@ -61,7 +58,16 @@ quickcheck! {
             MurmurHash3_x64_128(xs.as_ptr() as _, xs.len() as i32,seed, output_bytes.as_ptr() as *mut _)
         };
         let output = LittleEndian::read_u128(&output_bytes);
-        let output2 = murmur3_x64_128(&mut Cursor::new(xs), seed).unwrap();
-        output == output2
+        let output2 = murmur3_x64_128(&mut Cursor::new(&xs), seed).unwrap();
+        let res1 = output == output2;
+
+
+        let mut hasher = MurmurHasher_64_128::new(seed);
+        let h = hasher.update(&xs).finalize();
+        let output_bytes2: [u8; 16] = h.into();
+
+        let res2 = output_bytes == output_bytes2;
+
+        res1 && res2
     }
 }
