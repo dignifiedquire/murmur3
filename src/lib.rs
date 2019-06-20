@@ -8,8 +8,8 @@
 
 extern crate byteorder;
 
+use byteorder::{ByteOrder, LittleEndian};
 use std::io::Read;
-use byteorder::{LittleEndian, ByteOrder};
 
 pub mod murmur3_32;
 pub mod murmur3_x64_128;
@@ -72,7 +72,7 @@ fn calc_k(k: u32) -> u32 {
     k.wrapping_mul(C1).rotate_left(R1).wrapping_mul(C2)
 }*/
 
-pub fn murmur3_x86_128<T :Read>(source: &mut T, seed: u32, out: &mut [u8]) {
+pub fn murmur3_x86_128<T: Read>(source: &mut T, seed: u32, out: &mut [u8]) {
     const C1: u32 = 0x239b961b;
     const C2: u32 = 0xab0e9789;
     const C3: u32 = 0x38b34ae5;
@@ -105,19 +105,37 @@ pub fn murmur3_x86_128<T :Read>(source: &mut T, seed: u32, out: &mut [u8]) {
                         let k3: u32 = LittleEndian::read_u32(&buf[8..12]);
                         let k4: u32 = LittleEndian::read_u32(&buf[12..16]);
                         h1 ^= k1.wrapping_mul(C1).rotate_left(15).wrapping_mul(C2);
-                        h1 = h1.rotate_left(19).wrapping_add(h2).wrapping_mul(M).wrapping_add(C5);
+                        h1 = h1
+                            .rotate_left(19)
+                            .wrapping_add(h2)
+                            .wrapping_mul(M)
+                            .wrapping_add(C5);
                         h2 ^= k2.wrapping_mul(C2).rotate_left(16).wrapping_mul(C3);
-                        h2 = h2.rotate_left(17).wrapping_add(h3).wrapping_mul(M).wrapping_add(C6);
+                        h2 = h2
+                            .rotate_left(17)
+                            .wrapping_add(h3)
+                            .wrapping_mul(M)
+                            .wrapping_add(C6);
                         h3 ^= k3.wrapping_mul(C3).rotate_left(17).wrapping_mul(C4);
-                        h3 = h3.rotate_left(15).wrapping_add(h4).wrapping_mul(M).wrapping_add(C7);
+                        h3 = h3
+                            .rotate_left(15)
+                            .wrapping_add(h4)
+                            .wrapping_mul(M)
+                            .wrapping_add(C7);
                         h4 ^= k4.wrapping_mul(C4).rotate_left(18).wrapping_mul(C1);
-                        h4 = h4.rotate_left(13).wrapping_add(h1).wrapping_mul(M).wrapping_add(C8);
+                        h4 = h4
+                            .rotate_left(13)
+                            .wrapping_add(h1)
+                            .wrapping_mul(M)
+                            .wrapping_add(C8);
                     }
                     13...15 => {
                         h1 ^= process_h1_k_x86(LittleEndian::read_u32(&buf[0..4]));
                         h2 ^= process_h2_k_x86(LittleEndian::read_u32(&buf[4..8]));
                         h3 ^= process_h3_k_x86(LittleEndian::read_u32(&buf[8..12]));
-                        h4 ^= process_h4_k_x86(LittleEndian::read_uint(&buf[12..size], size -12) as u32);
+                        h4 ^= process_h4_k_x86(
+                            LittleEndian::read_uint(&buf[12..size], size - 12) as u32
+                        );
                     }
                     12 => {
                         h1 ^= process_h1_k_x86(LittleEndian::read_u32(&buf[0..4]));
@@ -127,7 +145,9 @@ pub fn murmur3_x86_128<T :Read>(source: &mut T, seed: u32, out: &mut [u8]) {
                     9...11 => {
                         h1 ^= process_h1_k_x86(LittleEndian::read_u32(&buf[0..4]));
                         h2 ^= process_h2_k_x86(LittleEndian::read_u32(&buf[4..8]));
-                        h3 ^= process_h3_k_x86(LittleEndian::read_uint(&buf[8..size], size -8) as u32);
+                        h3 ^= process_h3_k_x86(
+                            LittleEndian::read_uint(&buf[8..size], size - 8) as u32
+                        );
                     }
                     8 => {
                         h1 ^= process_h1_k_x86(LittleEndian::read_u32(&buf[0..4]));
@@ -135,7 +155,9 @@ pub fn murmur3_x86_128<T :Read>(source: &mut T, seed: u32, out: &mut [u8]) {
                     }
                     5...7 => {
                         h1 ^= process_h1_k_x86(LittleEndian::read_u32(&buf[0..4]));
-                        h2 ^= process_h2_k_x86(LittleEndian::read_uint(&buf[4..size], size-4) as u32);
+                        h2 ^= process_h2_k_x86(
+                            LittleEndian::read_uint(&buf[4..size], size - 4) as u32
+                        );
                     }
                     4 => {
                         h1 ^= process_h1_k_x86(LittleEndian::read_u32(&buf));
@@ -219,8 +241,7 @@ fn fmix32(k: u32) -> u32 {
     tmp
 }
 
-
-pub fn murmur3_x64_128<T:Read>(source: &mut T, seed: u32, out: &mut [u8]) {
+pub fn murmur3_x64_128<T: Read>(source: &mut T, seed: u32, out: &mut [u8]) {
     const C1: u64 = 0x52dc_e729;
     const C2: u64 = 0x3849_5ab5;
     const R1: u32 = 27;
@@ -241,9 +262,17 @@ pub fn murmur3_x64_128<T:Read>(source: &mut T, seed: u32, out: &mut [u8]) {
                         let k1 = LittleEndian::read_u64(&buf[0..8]);
                         let k2 = LittleEndian::read_u64(&buf[8..]);
                         h1 ^= process_h1_k_x64(k1);
-                        h1 = h1.rotate_left(R1).wrapping_add(h2).wrapping_mul(M).wrapping_add(C1);
+                        h1 = h1
+                            .rotate_left(R1)
+                            .wrapping_add(h2)
+                            .wrapping_mul(M)
+                            .wrapping_add(C1);
                         h2 ^= process_h2_k_x64(k2);
-                        h2 = h2.rotate_left(R2).wrapping_add(h1).wrapping_mul(M).wrapping_add(C2);
+                        h2 = h2
+                            .rotate_left(R2)
+                            .wrapping_add(h1)
+                            .wrapping_mul(M)
+                            .wrapping_add(C2);
                     }
                     9...15 => {
                         h1 ^= process_h1_k_x64(LittleEndian::read_u64(&buf[0..8]));
