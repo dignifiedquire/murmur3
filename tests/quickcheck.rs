@@ -59,15 +59,6 @@ quickcheck! {
         };
         let output = LittleEndian::read_u128(&output_bytes);
         let output2 = murmur3_x64_128(&mut Cursor::new(&xs), seed).unwrap();
-        let res1 = output == output2;
-
-
-        let mut hasher = MurmurHasher_64_128::new(seed);
-        let h = hasher.update(&xs).finalize();
-        let output_bytes2: [u8; 16] = h.into();
-
-        let res2 = output_bytes == output_bytes2;
-
-        res1 && res2
+        output == output2
     }
 }

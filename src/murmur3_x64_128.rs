@@ -1,4 +1,4 @@
-use byteorder::{ByteOrder, LittleEndian};
+use byteorder::{BigEndian, ByteOrder, LittleEndian};
 use std::error::Error;
 use std::hash::Hasher;
 use std::io::Read;
@@ -178,8 +178,8 @@ impl Into<[u8; 16]> for Hash {
     #[inline]
     fn into(self) -> [u8; 16] {
         let mut bytes = [0u8; 16];
-        LittleEndian::write_u64(&mut bytes[..8], self.0);
-        LittleEndian::write_u64(&mut bytes[8..], self.1);
+        BigEndian::write_u64(&mut bytes[..8], self.0);
+        BigEndian::write_u64(&mut bytes[8..], self.1);
         bytes
     }
 }
