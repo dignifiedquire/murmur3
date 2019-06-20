@@ -160,6 +160,13 @@ fn process_odd_bytes(h1: u64, h2: u64, index: usize, buf: &[u8]) -> (u64, u64) {
 #[derive(Debug, Clone)]
 pub struct Hash(u64, u64);
 
+impl Into<(u64, u64)> for Hash {
+    #[inline]
+    fn into(self) -> (u64, u64) {
+        (self.0, self.1)
+    }
+}
+
 impl Into<u128> for Hash {
     #[inline]
     fn into(self) -> u128 {
